@@ -11,13 +11,11 @@ from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 from Harita import OWNER_ID, tbot, UPSTREAM_REPO_URL
 
 async def gen_chlog(repo, diff):
-    ch_log = ""
     d_form = "%d/%m/%y"
-    for c in repo.iter_commits(diff):
-        ch_log += (
-            f"•[{c.committed_datetime.strftime(d_form)}]: {c.summary} by <{c.author}>\n"
-        )
-    return ch_log
+    return "".join(
+        f"•[{c.committed_datetime.strftime(d_form)}]: {c.summary} by <{c.author}>\n"
+        for c in repo.iter_commits(diff)
+    )
 
 @register(pattern="^/update(?: |$)(.*)")
 async def upstream(ups):
@@ -87,9 +85,8 @@ async def upstream(ups):
         )
         if len(changelog_str) > 4096:
             await lol.edit("`Changelog is too big, view the file to see it.`")
-            file = open("output.txt", "w+")
-            file.write(changelog_str)
-            file.close()
+            with open("output.txt", "w+") as file:
+                file.write(changelog_str)
             await tbot.send_file(
                 ups.chat_id,
                 "output.txt",
@@ -110,7 +107,7 @@ async def upstream(ups):
         ups_rem.pull(ac_br)
     except GitCommandError:
         repo.git.reset("--hard", "FETCH_HEAD")
-    
+
     await lol.edit("`Successfully Updated!\n" "restarting......`")
     args = [sys.executable, "-m", "Evie"]
     execle(sys.executable, *args, environ)

@@ -75,11 +75,7 @@ async def _(event):
                     try:
                         tts = gTTS(answer, tld="com", lang="en")
                         tts.save("results.mp3")
-                    except AssertionError:
-                        return
-                    except ValueError:
-                        return
-                    except RuntimeError:
+                    except (AssertionError, ValueError, RuntimeError):
                         return
                     except gTTSError:
                         return
@@ -99,11 +95,7 @@ async def _(event):
                         answer = "Sorry I can't understand"
                         tts = gTTS(answer, tld="com", lang="en")
                         tts.save("results.mp3")
-                    except AssertionError:
-                        return
-                    except ValueError:
-                        return
-                    except RuntimeError:
+                    except (AssertionError, ValueError, RuntimeError):
                         return
                     except gTTSError:
                         return

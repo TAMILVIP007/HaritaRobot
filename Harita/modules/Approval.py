@@ -59,17 +59,14 @@ async def approve(event):
     reply_msg = await event.get_reply_message()
     approved_userss = approved_users.find({})
 
-    if event.is_group:
-        if not await can_approve_users(message=event):
-            await event.reply("You are missing the following rights to use this command:CanChangeInfo")
-            return
-    else:
+    if not event.is_group:
         return
 
+    if not await can_approve_users(message=event):
+        await event.reply("You are missing the following rights to use this command:CanChangeInfo")
+        return
     userr = await get_user_from_event(event)
-    if userr:
-        pass
-    else:
+    if not userr:
         return
     iid = userr.id
 
@@ -78,7 +75,7 @@ async def approve(event):
         await event.reply("User is already admin - locks, blocklists, and antiflood already don't apply to them.")
         return
 
-    
+
 
     if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
         await event.reply("There's not much point in approving myself.")
@@ -101,17 +98,14 @@ async def disapprove(event):
     chat_id = event.chat.id
     sender = event.sender_id
     reply_msg = await event.get_reply_message()
-    if event.is_group:
-        if not await can_approve_users(message=event):
-            await event.reply("You are missing the following rights to use this command:CanChangeInfo")
-            return
-    else:
+    if not event.is_group:
         return
 
+    if not await can_approve_users(message=event):
+        await event.reply("You are missing the following rights to use this command:CanChangeInfo")
+        return
     userr = await get_user_from_event(event)
-    if userr:
-        pass
-    else:
+    if not userr:
         return
     iid = userr.id
 
@@ -139,16 +133,13 @@ async def checkst(event):
     reply_msg = await event.get_reply_message()
     approved_userss = approved_users.find({})
 
-    if event.is_group:
-        if not await can_approve_users(message=event):
-            return
-    else:
+    if not event.is_group:
         return
 
+    if not await can_approve_users(message=event):
+        return
     userr = await get_user_from_event(event)
-    if userr:
-        pass
-    else:
+    if not userr:
         return
     iid = userr.id
 
@@ -179,12 +170,11 @@ async def apprlst(event):
     sender = event.sender_id
     reply_msg = await event.get_reply_message()
 
-    if event.is_group:
-        if not await can_approve_users(message=event):
-            return
-    else:
+    if not event.is_group:
         return
 
+    if not await can_approve_users(message=event):
+        return
     autos = approved_users.find({})
     pp = ""
     for i in autos:
@@ -215,10 +205,9 @@ async def disapprlst(event):
     sender = event.sender_id
     reply_msg = await event.get_reply_message()
 
-    if event.is_group:
-        if not await can_approve_users(message=event):
-            return
-    else:
+    if not event.is_group:
+        return
+    if not await can_approve_users(message=event):
         return
     autos = approved_users.find({})
     for i in autos:

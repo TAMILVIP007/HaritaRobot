@@ -43,35 +43,30 @@ async def spammers(event):
     senderr = await event.get_sender()
     check = sender
     msg = event.text
-    USERSPAM = []
-    USERSPAM.append(check)
-    USERSPAM.append(msg)
-
+    USERSPAM = [check, msg]
     for (ent, txt) in event.get_entities_text():
-        if isinstance(ent, types.MessageEntityBotCommand):
-            pass
-        else:
+        if not isinstance(ent, types.MessageEntityBotCommand):
             return
 
     if (
-        spamcounter > 8
-        and event.sender_id == USERSPAM[0]
-        and ((datetime.now() - starttimer)).seconds <= 3
-    ) or (
-        spamcounter > 8 and event.sender_id == USERSPAM[0] and event.text == USERSPAM[1]
+        spamcounter <= 8
+        or event.sender_id != USERSPAM[0]
+        or ((datetime.now() - starttimer)).seconds > 3
+    ) and (
+        spamcounter <= 8
+        or event.sender_id != USERSPAM[0]
+        or event.text != USERSPAM[1]
     ):
-        spamcounter = 0
-        if senderr.username is None:
-            st = senderr.first_name
-            hh = senderr.id
-            final = f"[{st}](tg://user?id={hh}) you are detected as a spammer according to my algorithms.\nYou will be restricted from using any bot commands for 24 hours ! For Support join @HaritaSupport"
-        else:
-            st = senderr.username
-            final = f"@{st} you are detected as a spammer according to my algorithms.\nYou will be restricted from using any bot commands for 24 hours !"
-            pass
-    else:
         return
 
+    spamcounter = 0
+    if senderr.username is None:
+        st = senderr.first_name
+        hh = senderr.id
+        final = f"[{st}](tg://user?id={hh}) you are detected as a spammer according to my algorithms.\nYou will be restricted from using any bot commands for 24 hours ! For Support join @HaritaSupport"
+    else:
+        st = senderr.username
+        final = f"@{st} you are detected as a spammer according to my algorithms.\nYou will be restricted from using any bot commands for 24 hours !"
     client = MongoClient(MONGO_DB_URI)
     db = client["harita"]
     spammers = db.leecher

@@ -94,25 +94,24 @@ async def f(event):
      
 @tbot.on(events.CallbackQuery(pattern=r"fs(\_(.*))"))
 async def start_again(event):
- tata = event.pattern_match.group(1)
- data = tata.decode()
- user = data.split("_", 1)[1]
- if not event.sender_id == int(user):
-  return await event.answer("You are not the muted user!")
- chat_id = event.chat_id
- chat_db = sql.fs_settings(chat_id)
- if chat_db:
-    channel = chat_db.channel
-    rip = await check_him(channel, event.sender_id)
-    if rip is True:
-     try:
-       await event.delete()
-       await tbot(EditBannedRequest(event.chat_id, int(user), UNMUTE_RIGHTS))
-     except:
-       if not await rights(event):
-         return await tbot.send_message(event.chat_id, "❗ **I am not an admin here.**\nMake me admin with ban user permission")
-    else:
-     await event.answer("Please join the Channel!")
+    tata = event.pattern_match.group(1)
+    data = tata.decode()
+    user = data.split("_", 1)[1]
+    if event.sender_id != int(user):
+        return await event.answer("You are not the muted user!")
+    chat_id = event.chat_id
+    if chat_db := sql.fs_settings(chat_id):
+        channel = chat_db.channel
+        rip = await check_him(channel, event.sender_id)
+        if rip is True:
+         try:
+           await event.delete()
+           await tbot(EditBannedRequest(event.chat_id, int(user), UNMUTE_RIGHTS))
+         except:
+           if not await rights(event):
+             return await tbot.send_message(event.chat_id, "❗ **I am not an admin here.**\nMake me admin with ban user permission")
+        else:
+         await event.answer("Please join the Channel!")
     
        
       

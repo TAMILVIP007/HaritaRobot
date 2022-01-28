@@ -30,14 +30,7 @@ def is_chat(chat_id):
 
     try:
 
-        chat = SESSION.query(ChatbotChats).get(str(chat_id))
-
-        if chat:
-
-            return True
-
-        return False
-
+        return bool(chat := SESSION.query(ChatbotChats).get(str(chat_id)))
     finally:
 
         SESSION.close()
@@ -84,10 +77,7 @@ def rem_chat(chat_id):
 
     with INSERTION_LOCK:
 
-        autochat = SESSION.query(ChatbotChats).get(str(chat_id))
-
-        if autochat:
-
+        if autochat := SESSION.query(ChatbotChats).get(str(chat_id)):
             SESSION.delete(autochat)
 
         SESSION.commit()

@@ -106,10 +106,7 @@ def get_readable_time(seconds: int) -> str:
 
     while count < 4:
         count += 1
-        if count < 3:
-            remainder, result = divmod(seconds, 60)
-        else:
-            remainder, result = divmod(seconds, 24)
+        remainder, result = divmod(seconds, 60) if count < 3 else divmod(seconds, 24)
         if seconds == 0 and remainder == 0:
             break
         time_list.append(int(result))
@@ -127,23 +124,22 @@ def get_readable_time(seconds: int) -> str:
 
 @register(pattern="^/setbio ?(.*)")
 async def bio(event):
-  replied_user = await event.get_reply_message()
-  user_id = replied_user.sender_id
-  input = event.pattern_match.group(1)
-  if event.sender_id == OWNER_ID:
-    if input == "None":
-       rm_bio(user_id)
-       await event.reply(f"Removed Bio of {replied_user.sender.first_name}")
-       return
-    set_bio(user_id, input)
-    await event.reply(f"Updated {replied_user.sender.first_name}'s bio!")
-  else:
-   if event.sender_id == user_id:
-     await event.reply("Are you looking to change your own ... ?? That 's it.")
-     return
-   else:
-     set_bio(user_id, input)
-     await event.reply(f"Updated {replied_user.sender.first_name}'s Bio")
+    replied_user = await event.get_reply_message()
+    user_id = replied_user.sender_id
+    input = event.pattern_match.group(1)
+    if event.sender_id == OWNER_ID:
+        if input == "None":
+           rm_bio(user_id)
+           await event.reply(f"Removed Bio of {replied_user.sender.first_name}")
+           return
+        set_bio(user_id, input)
+        await event.reply(f"Updated {replied_user.sender.first_name}'s bio!")
+    elif event.sender_id == user_id:
+        await event.reply("Are you looking to change your own ... ?? That 's it.")
+        return
+    else:
+        set_bio(user_id, input)
+        await event.reply(f"Updated {replied_user.sender.first_name}'s Bio")
      
 
 @register(pattern="^/info(?: |$)(.*)")
@@ -261,40 +257,39 @@ async def bgay(event):
 
 @register(pattern="^/shazam$")
 async def _(event):
- try:
-    if event.is_group:
-      if not await is_admin(event, event.sender_id):
-       return
-    if event.fwd_from:
-        return
-    if not event.reply_to_msg_id:
-        await event.reply("Reply to an audio message.")
-        return
-    reply_message = await event.get_reply_message()
-    stt = await event.reply("Identifying the song.")
-    tmp = './'
-    dl = await tbot.download_media(
-            reply_message,
-            tmp)
-    chat = "@auddbot"
-    await stt.edit("Identifying the song...")
-    async with ubot.conversation(chat) as conv:
-        try:
-            await conv.send_file(dl)
-            check = await conv.get_response()
-            if not check.text.startswith("Audio received"):
-                return await stt.edit("An error while identifying the song. Try to use a 5-10s long audio message.")
-            await stt.edit("Wait just a sec...")
-            result = await conv.get_response()
-            await ubot.send_read_acknowledge(conv.chat_id)
-        except Exception:
-            await stt.edit("Error, Report at @HaritaSupport")
+    try:
+        if event.is_group and not await is_admin(event, event.sender_id):
             return
-    namem = f"Song Name : {result.text.splitlines()[0]}\
+        if event.fwd_from:
+            return
+        if not event.reply_to_msg_id:
+            await event.reply("Reply to an audio message.")
+            return
+        reply_message = await event.get_reply_message()
+        stt = await event.reply("Identifying the song.")
+        tmp = './'
+        dl = await tbot.download_media(
+                reply_message,
+                tmp)
+        chat = "@auddbot"
+        await stt.edit("Identifying the song...")
+        async with ubot.conversation(chat) as conv:
+            try:
+                await conv.send_file(dl)
+                check = await conv.get_response()
+                if not check.text.startswith("Audio received"):
+                    return await stt.edit("An error while identifying the song. Try to use a 5-10s long audio message.")
+                await stt.edit("Wait just a sec...")
+                result = await conv.get_response()
+                await ubot.send_read_acknowledge(conv.chat_id)
+            except Exception:
+                await stt.edit("Error, Report at @HaritaSupport")
+                return
+        namem = f"Song Name : {result.text.splitlines()[0]}\
         \n\nDetails : {result.text.splitlines()[2]}"
-    await stt.edit(namem)
- except Exception as e:
-      await event.reply(e)
+        await stt.edit(namem)
+    except Exception as e:
+         await event.reply(e)
 
 
 

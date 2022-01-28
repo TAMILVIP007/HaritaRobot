@@ -29,72 +29,62 @@ from Harita.modules.sql.setbio_sql import set_bio, rm_bio, check_bio_status, is_
 
 @tbot.on(events.ChatAction)
 async def handler(event):
-    if event.user_added:
-        if event.user_id == BOT_ID:
-           if not is_chat(event.chat_id):
-                add_chat(event.chat_id)
-           await tbot.send_message(-1001486931338, f"Evie Added to {event.chat.title}\n`{event.chat_id}`")
-           await tbot.send_message(event.chat_id, "Heya :-D Now leave your group on my hands and let me manage it. If you need any help, head to @EvieSupport.")
+    if event.user_added and event.user_id == BOT_ID:
+        if not is_chat(event.chat_id):
+             add_chat(event.chat_id)
+        await tbot.send_message(-1001486931338, f"Evie Added to {event.chat.title}\n`{event.chat_id}`")
+        await tbot.send_message(event.chat_id, "Heya :-D Now leave your group on my hands and let me manage it. If you need any help, head to @EvieSupport.")
               
 @tbot.on(events.ChatAction)
 async def handler(event):
-    if event.user_kicked:
-        if event.user_id == BOT_ID:
-              rmchat(event.chat_id)
+    if event.user_kicked and event.user_id == BOT_ID:
+        rmchat(event.chat_id)
 
 
 @register(pattern="^/stats")
 async def stat(event):
-    if event.sender_id == OWNER_ID:
-     pass
-    elif event.sender_id in DEV_USERS:
-     pass
-    else:
-     return
+    if event.sender_id != OWNER_ID and event.sender_id not in DEV_USERS:
+        return
     used = get_all_users()
     await event.reply(f"<b>I have <u>{len(used)}</u> Users In My Database.</b>", parse_mode="HTML")
 
 @register(pattern="^/addsudo ?(.*)")
 async def approve(event):
-   if event.sender_id == OWNER_ID:
-      pass
-   else:
-      return
-   sender = event.sender_id
-   reply_msg = await event.get_reply_message()
-   iid = reply_msg.sender_id
-   fname = reply_msg.sender.first_name
-   if iid == OWNER_ID:
-     return
-   if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
-        await event.reply("Whokey")
+    if event.sender_id != OWNER_ID:
         return
-   if sql.is_sudo(iid):
-      await event.reply("This is already a pro Sudo!")
+    sender = event.sender_id
+    reply_msg = await event.get_reply_message()
+    iid = reply_msg.sender_id
+    fname = reply_msg.sender.first_name
+    if iid == OWNER_ID:
       return
-   await event.reply("Sucessfully set the Disaster level of this user to **Sudo User**.")
-   sql.set_sudo(iid, fname)
+    if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
+         await event.reply("Whokey")
+         return
+    if sql.is_sudo(iid):
+       await event.reply("This is already a pro Sudo!")
+       return
+    await event.reply("Sucessfully set the Disaster level of this user to **Sudo User**.")
+    sql.set_sudo(iid, fname)
    
 @register(pattern="^/delsudo ?(.*)")
 async def approve(event):
-   if event.sender_id == OWNER_ID:
-      pass
-   else:
-      return
-   sender = event.sender_id
-   bl = blacklist.find({})
-   reply_msg = await event.get_reply_message()
-   iid = reply_msg.sender_id
-   if iid == OWNER_ID:
-     return
-   if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
-        await event.reply("Whokey")
+    if event.sender_id != OWNER_ID:
         return
-   if sql.is_sudo(iid):
-         sql.rm_sudo(iid)
-         await event.reply("Removed From **Sudo Users**.")
+    sender = event.sender_id
+    bl = blacklist.find({})
+    reply_msg = await event.get_reply_message()
+    iid = reply_msg.sender_id
+    if iid == OWNER_ID:
+      return
+    if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
+         await event.reply("Whokey")
          return
-   await event.reply("This is not event a Sudo User;(")
+    if sql.is_sudo(iid):
+          sql.rm_sudo(iid)
+          await event.reply("Removed From **Sudo Users**.")
+          return
+    await event.reply("This is not event a Sudo User;(")
    
 
 @register(pattern="^/sudolist")
@@ -111,112 +101,97 @@ async def sud(event):
 
 @register(pattern="^/blacklist ?(.*)")
 async def approve(event):
-   if event.sender_id == OWNER_ID:
-      pass
-   elif event.sender_id in DEV_USERS:
-      pass
-   else:
-      return
-   sender = event.sender_id
-   bl = blacklist.find({})
-   reply_msg = await event.get_reply_message()
-   iid = reply_msg.sender_id
-   if iid == OWNER_ID:
-     return
-   elif iid in DEV_USERS:
-     return
-   elif iid in SUDO_USERS:
-     return
-   elif sudo(iid):
-     return
-   if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
-        await event.reply("I am not gonna blacklist myself")
+    if event.sender_id != OWNER_ID and event.sender_id not in DEV_USERS:
         return
-   a = blacklist.find({})
-   for i in a:
-         if iid == i["user"]:
-                await event.reply("This User is Already Blacklisted")
-                return
-   blacklist.insert_one({"user": iid})
-   await event.reply("Successfully Blacklisted This Retard")
-   loda=""
-   try:
-     for i in a:
-       k = i["user"]
-       loda += f"{k}\n"
-   except Exception as ok:
-       await e.reply(ok)
-   await event.reply(loda)
+    sender = event.sender_id
+    bl = blacklist.find({})
+    reply_msg = await event.get_reply_message()
+    iid = reply_msg.sender_id
+    if iid == OWNER_ID:
+      return
+    elif iid in DEV_USERS:
+      return
+    elif iid in SUDO_USERS:
+      return
+    elif sudo(iid):
+      return
+    if event.sender_id == BOT_ID or int(iid) == int(BOT_ID):
+         await event.reply("I am not gonna blacklist myself")
+         return
+    a = blacklist.find({})
+    for i in a:
+          if iid == i["user"]:
+                 await event.reply("This User is Already Blacklisted")
+                 return
+    blacklist.insert_one({"user": iid})
+    await event.reply("Successfully Blacklisted This Retard")
+    loda=""
+    try:
+      for i in a:
+        k = i["user"]
+        loda += f"{k}\n"
+    except Exception as ok:
+        await e.reply(ok)
+    await event.reply(loda)
 
 @register(pattern="^/unblacklist ?(.*)")
 async def approve(event):
-   if event.sender_id == OWNER_ID:
-      pass
-   elif event.sender_id in DEV_USERS:
-      pass
-   else:
-      return
-   sender = event.sender_id
-   bl = blacklist.find({})
-   reply_msg = await event.get_reply_message()
-   iid = reply_msg.sender_id
-   a = blacklist.find({})
-   for i in a:
-       if iid == i["user"]:
-            blacklist.delete_one({"user": iid})
-            await event.reply("Successfully Unblacklisted User")
-            return
-   await event.reply("This User isn't Blacklisted yet")
+    if event.sender_id != OWNER_ID and event.sender_id not in DEV_USERS:
+        return
+    sender = event.sender_id
+    bl = blacklist.find({})
+    reply_msg = await event.get_reply_message()
+    iid = reply_msg.sender_id
+    a = blacklist.find({})
+    for i in a:
+        if iid == i["user"]:
+             blacklist.delete_one({"user": iid})
+             await event.reply("Successfully Unblacklisted User")
+             return
+    await event.reply("This User isn't Blacklisted yet")
 
 
 @register(pattern="^/echo ?(.*)")
 async def echo(event):
-  if event.fwd_from:
+    if event.fwd_from:
+          return
+    if event.sender_id == OWNER_ID:
+        pass
+    elif sudo(event.sender_id):
+          pass
+    elif not is_admin(event, event.sender_id):
         return
-  if event.sender_id == OWNER_ID:
-        pass
-  elif sudo(event.sender_id):
-        pass
-  elif is_admin(event, event.sender_id):
-        pass
-  else:
-        return
-  if event.reply_to_msg_id:
-          previous_message = await event.get_reply_message()
-          try:
-            await event.delete()
-          except Exception:
-            pass
-          k = await tbot.send_message(
-                event.chat_id,
-                previous_message
-             )
-  else:
-          ok = event.pattern_match.group(1)
-          try:
-            await event.delete()
-          except Exception:
-            pass
-          await tbot.send_message(event.chat_id, ok)
+    if event.reply_to_msg_id:
+            previous_message = await event.get_reply_message()
+            try:
+              await event.delete()
+            except Exception:
+              pass
+            k = await tbot.send_message(
+                  event.chat_id,
+                  previous_message
+               )
+    else:
+            ok = event.pattern_match.group(1)
+            try:
+              await event.delete()
+            except Exception:
+              pass
+            await tbot.send_message(event.chat_id, ok)
 
 
 @register(pattern="^/exec (.*)")
 async def msg(event):
     if event.sender_id == OWNER_ID:
         pass
-    elif event.sender_id in SUDO_USERS:
-        await event.reply("This is a Assembler restricted command. You do not have permissions to run this.")
-        return
-    elif event.sender_id in DEV_USERS:
+    elif event.sender_id in SUDO_USERS or event.sender_id in DEV_USERS:
         await event.reply("This is a Assembler restricted command. You do not have permissions to run this.")
         return
     else:
         return
     PROCESS_RUN_TIME = 100
     cmd = event.pattern_match.group(1)
-    reply_to_id = event.message.id
-    if event.reply_to_msg_id:
-        reply_to_id = event.reply_to_msg_id
+    reply_to_id = event.reply_to_msg_id or event.message.id
     time.time() + PROCESS_RUN_TIME
     process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -231,8 +206,8 @@ async def msg(event):
     else:
         _o = o.split("\n")
         o = "`\n".join(_o)
-    await event.reply(f"**QUERY:**\n__Command:__\n`{cmd}` \n__PID:__\n`{process.pid}`\n\n**stderr:** \n`{e}`\n**Output:**\n{o}"
-)
+        await event.reply(f"**QUERY:**\n__Command:__\n`{cmd}` \n__PID:__\n`{process.pid}`\n\n**stderr:** \n`{e}`\n**Output:**\n{o}"
+    )
 
 @register(pattern="^/eval")
 async def _(event):
@@ -249,17 +224,13 @@ async def _(event):
         if "from Luna import abot" in cmd or "from Luna import STRING_SESSION" in cmd:
           await event.reply("Can't Acess Master Account.")
           return
-        if "await tbot.send_message" in cmd or "from Luna import STRING_SESSION" in cmd:
-          await event.reply("Ni Hoskta!")
-          return
-        pass
+        if "await tbot.send_message" in cmd:
+            await event.reply("Ni Hoskta!")
+            return
     else:
         return
-    
-    reply_to_id = event.message.id
-    if event.reply_to_msg_id:
-        reply_to_id = event.reply_to_msg_id
 
+    reply_to_id = event.reply_to_msg_id or event.message.id
     old_stderr = sys.stderr
     old_stdout = sys.stdout
     redirected_output = sys.stdout = io.StringIO()
@@ -303,7 +274,7 @@ async def _(event):
 
 @ubot.on(events.NewMessage(pattern="!exec ?(.*)"))
 async def ebent(event):
-    if not event.sender_id == OWNER_ID:
+    if event.sender_id != OWNER_ID:
         return
     if event.fwd_from:
         return

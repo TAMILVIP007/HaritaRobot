@@ -26,8 +26,7 @@ async def _(event):
         return
     chat_id = event.chat_id
     sender = event.sender_id
-    rules = sql.get_rules(chat_id)
-    if rules:
+    if rules := sql.get_rules(chat_id):
         await event.reply(
             "Click on the below button to get this group's rules 👇",
             buttons=[[Button.inline("Rules", data=f"start-rules-{sender}")]],
@@ -44,7 +43,7 @@ async def rm_warn(event):
     rules = sql.get_rules(event.chat_id)
     # print(rules)
     user_id = int(event.pattern_match.group(1))
-    if not event.sender_id == user_id:
+    if event.sender_id != user_id:
         await event.answer("You haven't send that command !")
         return
     text = f"The rules for **{event.chat.title}** are:\n\n{rules}"
@@ -61,10 +60,9 @@ async def rm_warn(event):
 
 @register(pattern="^/setrules")
 async def _(event):
-    if event.is_group:
-        if not await can_change_info(message=event):
-            return
-    else:
+    if not event.is_group:
+        return
+    if not await can_change_info(message=event):
         return
     chat_id = event.chat_id
     raw_text = event.text
@@ -77,10 +75,9 @@ async def _(event):
 
 @register(pattern="^/clearrules$")
 async def _(event):
-    if event.is_group:
-        if not await can_change_info(message=event):
-            return
-    else:
+    if not event.is_group:
+        return
+    if not await can_change_info(message=event):
         return
     chat_id = event.chat_id
     sql.set_rules(chat_id, "")
